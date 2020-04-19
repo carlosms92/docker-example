@@ -1,0 +1,48 @@
+version: '2.3'
+
+services:
+  app:
+    build:
+      context: ${PWD}
+      dockerfile: Dockerfile
+    environment:
+      - DISPLAY_ERRORS
+      - MYSQL_HOST
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+    volumes:
+      - ${PWD}/var/www/html
+    ports:
+      - 8000:80
+    networks:
+      - application
+      - already_created_network
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_USER}
+    volumes:
+      - ${PWD}/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - admin
+      - already_created_network
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
+    networks:
+      - admin
+
+networks:
+  already_created_network:
+    external:
+      name: pre_existing_network_name
+  admin:
+  application:
+  other_networks:
